@@ -12,6 +12,8 @@ from google_img_source_search import ReverseImageSearcher
 uid = uuid.uuid4()
 
 def save_uploaded_file(uploaded_file):
+    if not os.path.exists("uploads"):
+        os.makedirs("uploads")
     with open(os.path.join("uploads", f"{uid}.png"), "wb") as f:
         f.write(uploaded_file.getbuffer())
     return os.path.join("uploads", f"{uid}.png")
