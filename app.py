@@ -77,17 +77,16 @@ def rev_im(image):
     try:
         print(f"Opening image: {image}")
         with Image.open(image) as img:
-            print(f"Image opened successfully.")
-            tmp_path = f"{uid}-im_tmp.png"
-            print(f"Saving image to temporary file: {tmp_path}")
-            img.save(tmp_path)
-            out = os.path.abspath(tmp_path)
-            print(f"Temporary image file path: {out}")
+            print(f"Saving image to temporary file.")
+            img.save(f"{uid}-im_tmp.png")
+            out = os.path.abspath(f"{uid}-im_tmp.png")
             out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
             print(f"Searching reverse image with URL: {out_url}")
             rev_img_searcher = ReverseImageSearcher()
             res = rev_img_searcher.search(out_url)
             count = 0
+            if not res:
+                raise RuntimeError('No results found.')
             for search_item in res:
                 count += 1
                 out_dict = {
