@@ -71,37 +71,38 @@ def process_vid(file, cur_frame, every_n):
     return ('No frame matches found.', "", "")
 
 def rev_im(image):
-    out_list = []
-    out_im = []
-    html_out = ""
     try:
-        print(f"Opening image: {image}")
-        with Image.open(image) as img:
-            print(f"Saving image to temporary file.")
-            img.save(f"{uid}-im_tmp.png")
-            out = os.path.abspath(f"{uid}-im_tmp.png")
-            out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
-            print(f"Searching reverse image with URL: {out_url}")
-            rev_img_searcher = ReverseImageSearcher()
-            res = rev_img_searcher.search(out_url)
-            count = 0
-            if not res:
-                raise RuntimeError('No results found.')
-            for search_item in res:
-                count += 1
-                out_dict = {
-                    'Title': f'{search_item.page_title}',
-                    'Site': f'{search_item.page_url}',
-                    'Img': f'{search_item.image_url}',
-                }
-                html_out = f"""{html_out}
-                <div>
-                Title: {search_item.page_title}<br>
-                Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-                Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-                <img class='my_im' src='{search_item.image_url}'><br>
-                </div>"""
-            return (f'Total Found: {count}\n{html_out}')
+        if image.startswith("https://omnibus"):
+            out_list = []
+            out_im = []
+            html_out = ""
+            print(f"Opening image: {image}")
+            with Image.open(image) as img:
+                print(f"Saving image to temporary file.")
+                img.save(f"{uid}-im_tmp.png")
+                out = os.path.abspath(f"{uid}-im_tmp.png")
+                out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
+                print(f"Searching reverse image with URL: {out_url}")
+                rev_img_searcher = ReverseImageSearcher()
+                res = rev_img_searcher.search(out_url)
+                count = 0
+                for search_item in res:
+                    count += 1
+                    out_dict = {
+                        'Title': f'{search_item.page_title}',
+                        'Site': f'{search_item.page_url}',
+                        'Img': f'{search_item.image_url}',
+                    }
+                    html_out = f"""{html_out}
+                    <div>
+                    Title: {search_item.page_title}<br>
+                    Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
+                    Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
+                    <img class='my_im' src='{search_item.image_url}'><br>
+                    </div>"""
+                return (f'Total Found: {count}\n{html_out}')
+        else:
+            return ('Invalid image URL', 'Image URL should start with "https://omnibus"', '')
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         return ('An unexpected error occurred.', str(e), "")
