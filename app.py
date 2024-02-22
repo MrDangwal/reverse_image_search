@@ -1,11 +1,6 @@
 import streamlit as st
-import requests
 import os
 import uuid
-import http.server
-import socketserver
-from threading import Thread
-from urllib.parse import quote
 
 from google_img_source_search import ReverseImageSearcher
 
@@ -18,21 +13,6 @@ def save_uploaded_file(uploaded_file):
         f.write(uploaded_file.getbuffer())
     return os.path.join("uploads", f"{uid}.png")
 
-def start_http_server(image_path):
-    # Change to the directory containing the image
-    os.chdir(os.path.dirname(image_path))
-    
-    # Start a simple HTTP server in a new thread
-    port = 8000
-    Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("", port), Handler)
-    
-    thread = Thread(target=httpd.serve_forever)
-    thread.daemon = True
-    thread.start()
-
-    return f'http://localhost:{port}/{quote(os.path.basename(image_path))}'
-
 def rev_im(image):
     out_list = []
     out_im = []
@@ -41,11 +21,14 @@ def rev_im(image):
     # Save the uploaded image to disk
     tmp_path = save_uploaded_file(image)
 
-    # Start a simple HTTP server to serve the image
-    server_url = start_http_server(tmp_path)
+    # Display the uploaded image
+    st.image(tmp_path, caption="Uploaded Image.", use_column_width=True)
 
     rev_img_searcher = ReverseImageSearcher()
-    res = rev_img_searcher.search(server_url)
+    try:
+        res = rev_img_searcher.search(tmp_path)
+    except RuntimeError as e:
+        return str(e)
 
     count = 0
     for search_item in res:
@@ -70,7 +53,6 @@ def main():
 
     uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
     if uploaded_image is not None:
-        st.image(uploaded_image, caption="Uploaded Image.", use_column_width=True)
         if st.button("Search"):
             result = rev_im(uploaded_image)
             st.markdown(result)
