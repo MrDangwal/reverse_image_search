@@ -1,6 +1,5 @@
 requests
 yt-dlp
-opencv-python
 google-image-source-search
 Pillow
 streamlit
