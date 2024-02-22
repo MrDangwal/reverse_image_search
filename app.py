@@ -5,7 +5,8 @@ from google_img_source_search import ReverseImageSearcher
 from PIL import Image
 import os
 import uuid
-from streamlit.uploaded_file_manager import UploadedFile
+from streamlit import UploadedFile
+
 
 uid = uuid.uuid4()
 
