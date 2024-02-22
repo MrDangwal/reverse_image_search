@@ -4,4 +4,4 @@ google-image-source-search
 Pillow
 streamlit
 imageio
-socket
+socketserver
