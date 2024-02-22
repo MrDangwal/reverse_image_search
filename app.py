@@ -1,33 +1,51 @@
 import streamlit as st
-import os
 from google_img_source_search import ReverseImageSearcher
+from PIL import Image
+import io
+import os
 
-def rev_im(uploaded_image):
+# Function to save the uploaded file and return the local file path
+def save_uploaded_file(uploaded_file):
+    if uploaded_file is not None:
+        # Save the uploaded file
+        with open(os.path.join("uploads", uploaded_file.name), "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        # Return the local file path
+        return os.path.abspath(os.path.join("uploads", uploaded_file.name))
+    return None
+
+# Main function to perform reverse image search
+def rev_im(image):
+    # Initialize Google Image Source Search
     rev_img_searcher = ReverseImageSearcher()
+    
     try:
-        res = rev_img_searcher.search(uploaded_image)
-        count = 0
+        # Perform reverse image search
+        res = rev_img_searcher.search(image)
+        # Print search results
         for search_item in res:
-            count += 1
             st.write(f'Title: {search_item.page_title}')
             st.write(f'Site: {search_item.page_url}')
-            st.image(search_item.image_url, caption="Image", use_column_width=True)
-    except RuntimeError as e:
+            st.image(search_item.image_url, caption='Image')
+
+    except Exception as e:
         st.error(f"An unexpected error occurred while processing the image: {e}")
 
 def main():
     st.title("Reverse Image Search")
 
-    uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
-    if uploaded_image is not None:
-        # Save the uploaded image to a temporary location
-        with open("temp_image.png", "wb") as f:
-            f.write(uploaded_image.getvalue())
-        
-        if st.button("Search"):
-            rev_im("temp_image.png")
-            # Remove the temporary image file
-            os.remove("temp_image.png")
+    # File uploader for uploading the image
+    uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+    if uploaded_file is not None:
+        # Display the uploaded image
+        image = Image.open(io.BytesIO(uploaded_file.read()))
+        st.image(image, caption='Uploaded Image')
+
+        # Save the uploaded file and get the local file path
+        file_path = save_uploaded_file(uploaded_file)
+        if file_path is not None:
+            # Perform reverse image search using the local file path
+            rev_im(file_path)
 
 if __name__ == "__main__":
     main()
