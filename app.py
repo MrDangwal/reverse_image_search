@@ -1,23 +1,30 @@
 import streamlit as st
+import requests
 import os
+import uuid
 from google_img_source_search import ReverseImageSearcher
 from urllib.parse import quote
+
+uid = uuid.uuid4()
+
+def save_uploaded_file(uploaded_file):
+    if uploaded_file is not None:
+        with open(os.path.join("uploads", f"{uid}.png"), "wb") as f:
+            f.write(uploaded_file.getvalue())
+        return os.path.abspath(os.path.join("uploads", f"{uid}.png"))
+    return None
 
 def rev_im(image):
     out_list = []
     out_im = []
     html_out = ""
-    
     # Save the uploaded image to a temporary file
-    if image is not None:
-        tmp_path = os.path.join("uploads", image.name)
-        with open(tmp_path, "wb") as f:
-            f.write(image.getvalue())
-    else:
+    tmp_path = save_uploaded_file(image)
+    if tmp_path is None:
         return "No image uploaded."
 
     # Construct the URL with proper encoding
-    out_url = st.get_option("server.rootPath") + f'/uploads/{quote(image.name)}'
+    out_url = f'https://{st.server.server_address[0]}:{st.server.port}/{quote(tmp_path)}'
     
     print("Output URL:", out_url)  # Debug statement
     
