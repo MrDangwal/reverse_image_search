@@ -17,7 +17,7 @@ def save_uploaded_file(uploaded_file):
 
 def start_ngrok_server(image_path):
     # Start ngrok tunnel
-    public_url = ngrok.connect(addr="8000")
+    public_url = ngrok.connect(addr="8000", base_url="http://localhost:4040/api")
     return f"{public_url}/" + quote(os.path.basename(image_path))
 
 def rev_im(image):
