@@ -70,43 +70,59 @@ def process_vid(file, cur_frame, every_n):
         return (f'{e}', "", "")
     return ('No frame matches found.', "", "")
 
-def rev_im(image):
+def rev_im(uploaded_image):
     try:
-        if image.startswith("https://omnibus"):
-            out_list = []
-            out_im = []
-            html_out = ""
-            print(f"Opening image: {image}")
-            with Image.open(image) as img:
-                print(f"Saving image to temporary file.")
-                img.save(f"{uid}-im_tmp.png")
-                out = os.path.abspath(f"{uid}-im_tmp.png")
-                out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
-                print(f"Searching reverse image with URL: {out_url}")
-                rev_img_searcher = ReverseImageSearcher()
-                res = rev_img_searcher.search(out_url)
-                count = 0
-                for search_item in res:
-                    count += 1
-                    out_dict = {
-                        'Title': f'{search_item.page_title}',
-                        'Site': f'{search_item.page_url}',
-                        'Img': f'{search_item.image_url}',
-                    }
-                    html_out = f"""{html_out}
-                    <div>
-                    Title: {search_item.page_title}<br>
-                    Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-                    Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-                    <img class='my_im' src='{search_item.image_url}'><br>
-                    </div>"""
-                return (f'Total Found: {count}\n{html_out}')
+        # Check if uploaded_image is not None and is of type 'UploadedFile'
+        if uploaded_image is not None and isinstance(uploaded_image, UploadedFile):
+            # Open the uploaded image using PIL
+            with Image.open(uploaded_image) as img:
+                # Save the image to a temporary file
+                tmp_image_path = f"{uid}-im_tmp.png"
+                img.save(tmp_image_path)
+
+            # Perform reverse image search using the temporary image file
+            return perform_reverse_image_search(tmp_image_path)
         else:
-            return ('Invalid image URL', 'Image URL should start with "https://omnibus"', '')
+            return ('Invalid image file', 'Please upload a valid image file', '')
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return ('An unexpected error occurred.', str(e), "")
+        return ('An unexpected error occurred.', str(e), '')
 
+def perform_reverse_image_search(image_path):
+    try:
+        out_list = []
+        out_im = []
+        html_out = ""
+        
+        # Generate URL for the temporary image file
+        out_url = f'https://omnibus-reverse-image.hf.space/file={image_path}'
+        print(f"Searching reverse image with URL: {out_url}")
+        
+        # Perform reverse image search
+        rev_img_searcher = ReverseImageSearcher()
+        res = rev_img_searcher.search(out_url)
+        
+        # Process search results
+        count = 0
+        for search_item in res:
+            count += 1
+            out_dict = {
+                'Title': f'{search_item.page_title}',
+                'Site': f'{search_item.page_url}',
+                'Img': f'{search_item.image_url}',
+            }
+            html_out = f"""{html_out}
+            <div>
+            Title: {search_item.page_title}<br>
+            Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
+            Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
+            <img class='my_im' src='{search_item.image_url}'><br>
+            </div>"""
+            
+        return (f'Total Found: {count}\n{html_out}')
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return ('An unexpected error occurred.', str(e), '')
 
 def main():
     st.title("Reverse Image/Video Search")
