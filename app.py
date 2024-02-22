@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import yt_dlp
 import cv2
-from google_img_source_search import ReverseImageSearcher
+from google_image_source_search import ReverseImageSearcher
 from PIL import Image
 import os
 import uuid
