@@ -7,6 +7,8 @@ uid = uuid.uuid4()
 
 import urllib.parse
 
+from urllib.parse import quote
+
 def rev_im(image):
     out_list = []
     out_im = []
@@ -17,16 +19,19 @@ def rev_im(image):
     with open(tmp_path, "wb") as f:
         f.write(image.read())
     
-    # Encode the file path
-    encoded_file_path = urllib.parse.quote(os.path.abspath(tmp_path))
+    # Properly encode the file path for the URL
+    encoded_path = quote(os.path.abspath(tmp_path))
     
-    # Construct the URL with the encoded file path
-    out_url = f'https://omnibus-reverse-image.hf.space/file={encoded_file_path}'
+    # Construct the URL
+    out_url = f'https://omnibus-reverse-image.hf.space/file={encoded_path}'
+    
+    print("Output URL:", out_url)  # Debug statement
     
     rev_img_searcher = ReverseImageSearcher()
     try:
         res = rev_img_searcher.search(out_url)
     except Exception as e:
+        print("Error:", e)  # Debug statement
         return f"An unexpected error occurred while processing the image. Error: {str(e)}"
     
     count = 0
