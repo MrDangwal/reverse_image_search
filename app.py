@@ -6,7 +6,6 @@ import http.server
 import socketserver
 from threading import Thread
 from urllib.parse import quote
-import socket
 
 from google_img_source_search import ReverseImageSearcher
 
@@ -19,19 +18,12 @@ def save_uploaded_file(uploaded_file):
         f.write(uploaded_file.getbuffer())
     return os.path.join("uploads", f"{uid}.png")
 
-def get_free_port():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('localhost', 0))
-    port = s.getsockname()[1]
-    s.close()
-    return port
-
 def start_http_server(image_path):
     # Change to the directory containing the image
     os.chdir(os.path.dirname(image_path))
     
-    # Start a simple HTTP server on a random available port
-    port = get_free_port()
+    # Start a simple HTTP server in a new thread
+    port = 8000
     Handler = http.server.SimpleHTTPRequestHandler
     httpd = socketserver.TCPServer(("", port), Handler)
     
