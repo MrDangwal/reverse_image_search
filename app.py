@@ -53,7 +53,5 @@ def main():
                     result = rev_im(image_url)
                     st.markdown(result)
 
-    # Add functionality for video search and other parts of your code...
-
 if __name__ == "__main__":
     main()
