@@ -4,3 +4,5 @@ google-image-source-search
 Pillow
 streamlit
 uuid
+tempfile
+base64
