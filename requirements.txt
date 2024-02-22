@@ -1,6 +1,6 @@
 requests
 yt-dlp
 opencv-python
-google-img-source-search==0.0.5
+google-image-source-search
 Pillow
 streamlit
