@@ -8,7 +8,8 @@ uid = uuid.uuid4()
 
 def process_vid(file, cur_frame, every_n):
     new_video_in = str(file)
-    frame_count = 100  # Assuming frame count is 100 for testing
+    capture = cv2.VideoCapture(new_video_in)
+    frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     rev_img_searcher = ReverseImageSearcher()
     html_out = ""
     count = int(every_n)
@@ -21,8 +22,11 @@ def process_vid(file, cur_frame, every_n):
             if count == int(every_n):
                 count = 1
                 print(i)
-                # Your processing logic here
-                out_url = f'https://example.com/frame_{i}.png'
+                capture.set(cv2.CAP_PROP_POS_FRAMES, i)
+                ret, frame_f = capture.read(i)
+                cv2.imwrite(f"{uid}-vid_tmp{i}.png", frame_f)
+                frame_path = f"{uid}-vid_tmp{i}.png"
+                out_url = f'https://omnibus-reverse-image.hf.space/file={frame_path}'
                 res = rev_img_searcher.search(out_url)
                 out_cnt = 0
                 if len(res) > 0:
