@@ -75,10 +75,13 @@ def rev_im(image):
     out_im = []
     html_out = ""
     try:
+        print(f"Opening image: {image}")
         with Image.open(image) as img:
+            print(f"Saving image to temporary file.")
             img.save(f"{uid}-im_tmp.png")
             out = os.path.abspath(f"{uid}-im_tmp.png")
             out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
+            print(f"Searching reverse image with URL: {out_url}")
             rev_img_searcher = ReverseImageSearcher()
             res = rev_img_searcher.search(out_url)
             count = 0
@@ -99,7 +102,7 @@ def rev_im(image):
             return (f'Total Found: {count}\n{html_out}')
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return ('An unexpected error occurred.', "", "")
+        return ('An unexpected error occurred.', str(e), "")
 
 def main():
     st.title("Reverse Image/Video Search")
