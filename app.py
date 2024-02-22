@@ -18,23 +18,26 @@ def rev_im(image_path):
     imageio.imwrite(tmp_path, image)
     out_url = f'https://omnibus-reverse-image.hf.space/file={os.path.abspath(tmp_path)}'
     rev_img_searcher = ReverseImageSearcher()
-    res = rev_img_searcher.search(out_url)
-    count = 0
-    for search_item in res:
-        count += 1
-        out_dict = {
-            'Title': f'{search_item.page_title}',
-            'Site': f'{search_item.page_url}',
-            'Img': f'{search_item.image_url}',
-        }
-        html_out = f"""{html_out}
-        <div>
-        Title: {search_item.page_title}<br>
-        Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-        Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-        <img class='my_im' src='{search_item.image_url}'><br>
-        </div>"""
-    return f'Total Found: {count}\n{html_out}'
+    try:
+        res = rev_img_searcher.search(out_url)
+        count = 0
+        for search_item in res:
+            count += 1
+            out_dict = {
+                'Title': f'{search_item.page_title}',
+                'Site': f'{search_item.page_url}',
+                'Img': f'{search_item.image_url}',
+            }
+            html_out = f"""{html_out}
+            <div>
+            Title: {search_item.page_title}<br>
+            Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
+            Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
+            <img class='my_im' src='{search_item.image_url}'><br>
+            </div>"""
+        return f'Total Found: {count}\n{html_out}'
+    except ValueError:
+        return "Error: Unable to extract image information. Please try again with a different image."
 
 def main():
     st.title("Reverse Image Search")
