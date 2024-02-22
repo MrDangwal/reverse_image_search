@@ -7,30 +7,38 @@ import uuid
 uid = uuid.uuid4()
 
 def rev_im(image):
-    out_list = []
-    out_im = []
-    html_out = ""
-    image = Image.open(image)
-    image.save(f"{uid}-im_tmp.png")
-    out_url = f'https://omnibus-reverse-image.hf.space/file={uid}-im_tmp.png'
-    rev_img_searcher = ReverseImageSearcher()
-    res = rev_img_searcher.search(out_url)
-    count = 0
-    for search_item in res:
-        count += 1
-        out_dict = {
-            'Title': f'{search_item.page_title}',
-            'Site': f'{search_item.page_url}',
-            'Img': f'{search_item.image_url}',
-        }
-        html_out = f"""{html_out}
-        <div>
-        Title: {search_item.page_title}<br>
-        Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-        Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-        <img class='my_im' src='{search_item.image_url}'><br>
-        </div>"""
-    return f'Total Found: {count}\n{html_out}'
+    try:
+        out_list = []
+        out_im = []
+        html_out = ""
+        image = Image.open(image)
+        image.save(f"{uid}-im_tmp.png")
+        out_url = f'https://omnibus-reverse-image.hf.space/file={uid}-im_tmp.png'
+        rev_img_searcher = ReverseImageSearcher()
+        res = rev_img_searcher.search(out_url)
+        count = 0
+        for search_item in res:
+            count += 1
+            out_dict = {
+                'Title': f'{search_item.page_title}',
+                'Site': f'{search_item.page_url}',
+                'Img': f'{search_item.image_url}',
+            }
+            html_out = f"""{html_out}
+            <div>
+            Title: {search_item.page_title}<br>
+            Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
+            Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
+            <img class='my_im' src='{search_item.image_url}'><br>
+            </div>"""
+        if count == 0:
+            return f'No matching images found.'
+        else:
+            return f'Total Found: {count}\n{html_out}'
+    except ValueError:
+        return f'An unexpected error occurred while processing the image.'
+    except RuntimeError:
+        return f'Invalid image url.'
 
 def main():
     st.title("Reverse Image Search")
