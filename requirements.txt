@@ -4,4 +4,3 @@ google-image-source-search
 Pillow
 streamlit
 uuid
-pylocaltunnel
