@@ -1,25 +1,23 @@
 import streamlit as st
-from google_img_source_search import ReverseImageSearcher
 import os
-import uuid
-
-uid = uuid.uuid4()
-
-
-
-import base64
+from google_img_source_search import ReverseImageSearcher
+from urllib.parse import quote
 
 def rev_im(image):
     out_list = []
     out_im = []
     html_out = ""
     
-    # Encode the image as a Base64 string
-    image_bytes = image.read()
-    base64_img = base64.b64encode(image_bytes).decode('utf-8')
-    
-    # Construct the URL with the Base64-encoded image
-    out_url = f'https://omnibus-reverse-image.hf.space/base64={base64_img}'
+    # Save the uploaded image to a temporary file
+    if image is not None:
+        tmp_path = os.path.join("uploads", image.name)
+        with open(tmp_path, "wb") as f:
+            f.write(image.getvalue())
+    else:
+        return "No image uploaded."
+
+    # Construct the URL with proper encoding
+    out_url = st.get_option("server.rootPath") + f'/uploads/{quote(image.name)}'
     
     print("Output URL:", out_url)  # Debug statement
     
