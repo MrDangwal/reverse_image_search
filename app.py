@@ -104,6 +104,7 @@ def rev_im(image):
         print(f"An unexpected error occurred: {e}")
         return ('An unexpected error occurred.', str(e), "")
 
+
 def main():
     st.title("Reverse Image/Video Search")
 
