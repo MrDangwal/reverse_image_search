@@ -3,5 +3,4 @@ yt-dlp
 google-image-source-search
 Pillow
 streamlit
-imageio
-socketserver
+uuid
