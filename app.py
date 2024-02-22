@@ -1,10 +1,19 @@
 import streamlit as st
+import os
+
+def install_dependencies():
+    # Install libgl1-mesa-glx package
+    os.system("sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx")
+
+# Install dependencies
+install_dependencies()
+
+# Rest of your imports
 import requests
 import yt_dlp
 import cv2
-from google_image_source_search import ReverseImageSearcher
+from google_img_source_search import ReverseImageSearcher
 from PIL import Image
-import os
 import uuid
 
 uid = uuid.uuid4()
