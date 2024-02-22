@@ -5,25 +5,21 @@ import uuid
 
 uid = uuid.uuid4()
 
-import urllib.parse
 
-from urllib.parse import quote
+
+import base64
 
 def rev_im(image):
     out_list = []
     out_im = []
     html_out = ""
     
-    # Save the uploaded image to a temporary file
-    tmp_path = f"{uid}-im_tmp.png"
-    with open(tmp_path, "wb") as f:
-        f.write(image.read())
+    # Encode the image as a Base64 string
+    image_bytes = image.read()
+    base64_img = base64.b64encode(image_bytes).decode('utf-8')
     
-    # Properly encode the file path for the URL
-    encoded_path = quote(os.path.abspath(tmp_path))
-    
-    # Construct the URL
-    out_url = f'https://omnibus-reverse-image.hf.space/file={encoded_path}'
+    # Construct the URL with the Base64-encoded image
+    out_url = f'https://omnibus-reverse-image.hf.space/base64={base64_img}'
     
     print("Output URL:", out_url)  # Debug statement
     
