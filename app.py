@@ -2,14 +2,16 @@ import streamlit as st
 import os
 from google_img_source_search import ReverseImageSearcher
 
-def rev_im(image_path):
+def rev_im(uploaded_image):
     rev_img_searcher = ReverseImageSearcher()
     try:
-        res = rev_img_searcher.search(image_path)
+        res = rev_img_searcher.search(uploaded_image)
+        count = 0
         for search_item in res:
+            count += 1
             st.write(f'Title: {search_item.page_title}')
             st.write(f'Site: {search_item.page_url}')
-            st.image(search_item.image_url, caption='Image')
+            st.image(search_item.image_url, caption="Image", use_column_width=True)
     except RuntimeError as e:
         st.error(f"An unexpected error occurred while processing the image: {e}")
 
@@ -21,9 +23,11 @@ def main():
         # Save the uploaded image to a temporary location
         with open("temp_image.png", "wb") as f:
             f.write(uploaded_image.getvalue())
-        # Get the absolute path of the uploaded image
-        image_path = os.path.abspath("temp_image.png")
-        rev_im(image_path)
+        
+        if st.button("Search"):
+            rev_im("temp_image.png")
+            # Remove the temporary image file
+            os.remove("temp_image.png")
 
 if __name__ == "__main__":
     main()
