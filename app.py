@@ -51,31 +51,36 @@ def process_vid(file, cur_frame, every_n):
     return ('No frame matches found.', "", "")
 
 def rev_im(image):
-    out_list = []
-    out_im = []
-    html_out = ""
-    with Image.open(image) as img:
-        img.save(f"{uid}-im_tmp.png")
-        out = os.path.abspath(f"{uid}-im_tmp.png")
-        out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
-        rev_img_searcher = ReverseImageSearcher()
-        res = rev_img_searcher.search(out_url)
-        count = 0
-        for search_item in res:
-            count += 1
-            out_dict = {
-                'Title': f'{search_item.page_title}',
-                'Site': f'{search_item.page_url}',
-                'Img': f'{search_item.image_url}',
-            }
-            html_out = f"""{html_out}
-            <div>
-            Title: {search_item.page_title}<br>
-            Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-            Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-            <img class='my_im' src='{search_item.image_url}'><br>
-            </div>"""
-    return (f'Total Found: {count}\n{html_out}')
+    try:
+        out_list = []
+        out_im = []
+        html_out = ""
+        with Image.open(image) as img:
+            img.save(f"{uid}-im_tmp.png")
+            out = os.path.abspath(f"{uid}-im_tmp.png")
+            out_url = f'https://omnibus-reverse-image.hf.space/file={out}'
+            rev_img_searcher = ReverseImageSearcher()
+            res = rev_img_searcher.search(out_url)
+            count = 0
+            for search_item in res:
+                count += 1
+                out_dict = {
+                    'Title': f'{search_item.page_title}',
+                    'Site': f'{search_item.page_url}',
+                    'Img': f'{search_item.image_url}',
+                }
+                html_out = f"""{html_out}
+                <div>
+                Title: {search_item.page_title}<br>
+                Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
+                Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
+                <img class='my_im' src='{search_item.image_url}'><br>
+                </div>"""
+        if count == 0:
+            raise RuntimeError('No images found in the search results.')
+        return (f'Total Found: {count}\n{html_out}')
+    except Exception as e:
+        st.error(f"An error occurred while processing the image: {e}")
 
 def main():
     st.title("Reverse Image/Video Search")
@@ -88,7 +93,8 @@ def main():
             st.image(uploaded_image, caption="Uploaded Image.", use_column_width=True)
             if st.button("Search"):
                 result = rev_im(uploaded_image)
-                st.markdown(result)
+                if result:
+                    st.markdown(result)
 
     elif search_type == "Video":
         video_url = st.text_input("Enter Video URL")
