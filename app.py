@@ -1,69 +1,49 @@
 import streamlit as st
-import os
-import uuid
+from PIL import Image
 import requests
-from urllib.parse import quote
+from io import BytesIO
 from google_img_source_search import ReverseImageSearcher
-from pyngrok import ngrok
+import pylocaltunnel
 
-uid = uuid.uuid4()
-
+# Function to save the uploaded file
 def save_uploaded_file(uploaded_file):
-    if not os.path.exists("uploads"):
-        os.makedirs("uploads")
-    with open(os.path.join("uploads", f"{uid}.png"), "wb") as f:
+    uid = st.session_state.session_id
+    with open(f"uploads/{uid}.png", "wb") as f:
         f.write(uploaded_file.getbuffer())
-    return os.path.join("uploads", f"{uid}.png")
+    return f"uploads/{uid}.png"
 
-def start_ngrok_server(image_path):
-    # Start ngrok tunnel
-    public_url = ngrok.connect(addr="8000", base_url="http://localhost:4040/api")
-    return f"{public_url}/" + quote(os.path.basename(image_path))
+# Function to start a local server using pylocaltunnel
+def start_localtunnel_server(port):
+    tunnel = pylocaltunnel.Tunnel(port)
+    public_url = tunnel.start()
+    return public_url
 
-def rev_im(image):
-    out_list = []
-    out_im = []
-    html_out = ""
-    
-    # Save the uploaded image to disk
-    tmp_path = save_uploaded_file(image)
-
-    # Start ngrok server to host the image
-    server_url = start_ngrok_server(tmp_path)
-
-    rev_img_searcher = ReverseImageSearcher()
-    try:
-        res = rev_img_searcher.search(server_url)
-    except RuntimeError as e:
-        return str(e)
-
-    count = 0
-    for search_item in res:
-        count += 1
-        out_dict = {
-            'Title': f'{search_item.page_title}',
-            'Site': f'{search_item.page_url}',
-            'Img': f'{search_item.image_url}',
-        }
-        html_out = f"""{html_out}
-        <div>
-        Title: {search_item.page_title}<br>
-        Site: <a href='{search_item.page_url}' target='_blank' rel='noopener noreferrer'>{search_item.page_url}</a><br>
-        Img: <a href='{search_item.image_url}' target='_blank' rel='noopener noreferrer'>{search_item.image_url}</a><br>
-        <img class='my_im' src='{search_item.image_url}'><br>
-        </div>"""
-
-    return f'Total Found: {count}\n{html_out}'
-
+# Main function
 def main():
     st.title("Reverse Image Search")
 
-    uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
     if uploaded_image is not None:
         st.image(uploaded_image, caption="Uploaded Image.", use_column_width=True)
-        if st.button("Search"):
-            result = rev_im(uploaded_image)
-            st.markdown(result)
 
+        # Save the uploaded file
+        tmp_path = save_uploaded_file(uploaded_image)
+
+        # Start localtunnel server
+        server_url = start_localtunnel_server(8000)
+
+        # Perform reverse image search
+        rev_img_searcher = ReverseImageSearcher()
+        res = rev_img_searcher.search(server_url)
+
+        # Display search results
+        st.subheader("Search Results:")
+        for search_item in res:
+            st.write(f'Title: {search_item.page_title}')
+            st.write(f'Site: {search_item.page_url}')
+            st.image(search_item.image_url, caption="Image", use_column_width=True)
+
+# Run the main function
 if __name__ == "__main__":
     main()
