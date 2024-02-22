@@ -11,9 +11,14 @@ def rev_im(image):
         out_list = []
         out_im = []
         html_out = ""
-        image = Image.open(image)
-        image.save(f"{uid}-im_tmp.png")
-        out_url = f'https://omnibus-reverse-image.hf.space/file={uid}-im_tmp.png'
+        # Convert uploaded file to PIL image
+        pil_image = Image.open(image)
+        # Save the PIL image to a temporary file
+        temp_image_path = f"{uid}-im_tmp.png"
+        pil_image.save(temp_image_path)
+        # Construct the image URL
+        out_url = f'https://omnibus-reverse-image.hf.space/file={temp_image_path}'
+        # Perform reverse image search
         rev_img_searcher = ReverseImageSearcher()
         res = rev_img_searcher.search(out_url)
         count = 0
@@ -35,10 +40,10 @@ def rev_im(image):
             return f'No matching images found.'
         else:
             return f'Total Found: {count}\n{html_out}'
-    except ValueError:
+    except Exception as e:
+        # Catch any exceptions and return an error message
+        print(f"Error processing image: {e}")
         return f'An unexpected error occurred while processing the image.'
-    except RuntimeError:
-        return f'Invalid image url.'
 
 def main():
     st.title("Reverse Image Search")
