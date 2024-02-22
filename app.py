@@ -16,6 +16,9 @@ def rev_im(image):
         # Search for the provided image URL
         res = rev_img_searcher.search(image)
         
+        if not res:
+            return 'No results found for the provided image.'
+        
         count = 0
         for search_item in res:
             count += 1
@@ -32,10 +35,10 @@ def rev_im(image):
             <img class='my_im' src='{search_item.image_url}'><br>
             </div>"""
         
-        return f'Total Found: {count}\n{html_out}' if count > 0 else 'No results found.'
+        return (f'Total Found: {count}\n{html_out}')
     
     except Exception as e:
-        return f'An unexpected error occurred: {e}'
+        return (f'An unexpected error occurred: {e}', '', '')
 
 def main():
     st.title("Reverse Image/Video Search")
