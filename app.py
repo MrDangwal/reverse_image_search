@@ -1,35 +1,39 @@
 import streamlit as st
 from google_img_source_search import ReverseImageSearcher
+import tempfile
+import base64
+import os
+
+def save_uploaded_file(uploaded_file):
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(uploaded_file.read())
+    return temp_file.name
 
 def main():
     st.title("Reverse Image Search")
 
-    # File uploader for image
-    uploaded_image = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+    # File uploader
+    uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
-    if uploaded_image is not None:
-        # Display the uploaded image
-        st.image(uploaded_image, caption="Uploaded Image", use_column_width=True)
+    if uploaded_file is not None:
+        # Save uploaded file to a temporary location
+        tmp_path = save_uploaded_file(uploaded_file)
 
-        # Perform reverse image search
-        result = rev_im(uploaded_image)
-        st.write(result)
+        # Convert the image file to base64
+        with open(tmp_path, "rb") as img_file:
+            image_data = base64.b64encode(img_file.read()).decode("utf-8")
 
-def rev_im(image_data):
-    # Perform reverse image search using the uploaded image data
-    rev_img_searcher = ReverseImageSearcher()
-    res = rev_img_searcher.search(image_data)
+        # Initialize ReverseImageSearcher
+        rev_img_searcher = ReverseImageSearcher()
 
-    # Process the search results
-    search_results = []
-    for search_item in res:
-        search_results.append({
-            "Title": search_item.page_title,
-            "Site": search_item.page_url,
-            "Image": search_item.image_url
-        })
+        # Search for similar images
+        res = rev_img_searcher.search_by_image_data(image_data)
 
-    return search_results
+        # Display search results
+        for search_item in res:
+            st.write(f'Title: {search_item.page_title}')
+            st.write(f'Site: {search_item.page_url}')
+            st.write(f'Image: {search_item.image_url}\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
